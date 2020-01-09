@@ -1,1 +1,1 @@
-# WeChat Mini Program Client for Full Color LED Cube
+# WeChat Mini-Program Client for Music Light Cube

@@ -1,0 +1,44 @@
+<!--device.wxml-->
+<view class="container">
+  <view class="info">
+    <view class="info-view">
+      <text class="info-text">设备ID: {{devId}}\n</text>
+    </view>
+    <view class="info-view">
+      <text class="info-text">固件版本: {{devVer}}\n</text>
+    </view>
+  </view>
+  <view class="settings">
+    <text class="text-view">特效样式</text>
+    <block wx:if="{{!devIsCube}}">
+      <view class="input">
+        <input disabled="{{!devHasVfx}}" class="inputbox" bindinput="vfxModeInput" maxlength="3" type="number" value="{{vfxMode}}" placeholder="样式" />
+      </view>
+    </block>
+    <block wx:if="{{devIsCube}}">
+      <picker disabled="{{!devHasVfx}}" bindchange="vfxModePickerChange" value="{{vfxMode}}" range="{{vfxModeList}}" range-key="name">
+        <view class="picker-view">{{vfxModeList[vfxMode].name}}</view>
+      </picker>
+    </block>
+    <text class="setting-title">缩放系数</text>
+      <view class="setting-view">
+        <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="999" show-value/>
+      </view>
+    <text class="setting-title">色阶</text>
+      <view class="setting-view">
+        <slider disabled="{{!devHasVfx}}" bindchange="colorScaleSliderChange" value="{{vfxColorScale}}" min="0" max="511" show-value/>
+      </view>
+    <text class="setting-title">背光</text>
+      <view class="setting-view">
+        <slider disabled="{{!devHasBlk}}" bindchange="backlightSliderChange" value="{{vfxBacklight}}" min="0" max="255" show-value/>
+      </view>
+    </view>
+    <view class="setting-view">
+      <text class="text-view">音频输入</text>
+      <switch disabled="{{!devHasAin}}" checked="{{vfxAudioInput}}" bindchange="audioInputSwitchChange"/>
+    </view>
+  <view class="input">
+    <button disabled="{{!devHasVfx}}" class="submit-button" bindtap="submitBtn">提交</button>
+    <button disabled="{{!devHasVfx}}" class="reset-button" bindtap="resetBtn">重设</button>
+  </view>
+</view>

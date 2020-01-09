@@ -1,0 +1,98 @@
+/**index.wxss**/
+
+page,.page {
+  height: 100%;
+}
+
+.page-bottom{
+  height: 100%;
+  width: 75%;
+  position: fixed; 
+  background-color: rgb(66, 69, 66);
+  z-index: 0;
+}
+
+.page-list-title{
+  font-weight: bold;
+}
+
+.page-list{
+  color: white;
+  padding: 30rpx 0 30rpx 40rpx;
+}
+
+.page-top{
+  position: relative;
+  top: 0;
+  left:0;
+  width: 750rpx;
+  height: 100%;
+  background-color: rgb(255, 255, 255);
+  z-index: 0;
+  transition: All 0.4s ease; 
+  -webkit-transition: All 0.4s ease;
+}
+
+.page-state{
+  transform: rotate(0deg) scale(1) translate(75%,0%); 
+  -webkit-transform: rotate(0deg) scale(1) translate(75%,0%); 
+}
+.imgw{width:100%;}
+
+.page-top .left-nav{
+  position: fixed;
+  width: 68rpx;
+  height: 38rpx;
+  left: 20rpx;
+  bottom: 20rpx;
+}
+
+.page-mask{
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 998;
+}
+
+.page-mask-show{
+  display: none;
+}
+
+.container {
+  height: 75%;
+}
+
+.cover {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cover-image {
+  width: 200rpx;
+  height: 200rpx;
+  margin: 20rpx;
+  border-radius: 50%;
+}
+
+.prompt {
+  margin-top: 50rpx;
+}
+
+.prompt-text {
+  color: #aaa;
+}
+
+.input {
+  width: 300rpx;
+  margin: 75rpx;
+}
+
+.search-button {
+  margin-top: 50rpx;
+  margin-left: 25rpx;
+  margin-right: 25rpx;
+}

@@ -1,0 +1,78 @@
+/* device.wxss */
+
+.info {
+  margin-left:auto;
+  margin-right:auto;
+  width: 95%;
+}
+
+.info-view {
+  margin-top:15rpx;
+  margin-bottom:15rpx;
+}
+
+.info-text {
+  color: #aaa;
+}
+
+.settings {
+  margin-top:50rpx;
+  margin-left:auto;
+  margin-right:auto;
+  width:95%;
+}
+
+.input {
+  margin-left:auto;
+  margin-right:auto;
+}
+
+.inputbox {
+  margin-top: 25rpx;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom:27rpx;
+  text-align:center;
+  width:90%;
+  border-width: 1rpx 1rpx 1rpx 1rpx;
+  border-color: #aaa;
+  border-style: solid;
+  border-radius: 9rpx;
+}
+
+.picker-view {
+  margin-top:15rpx;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom:15rpx;
+  text-align:center;
+  line-height:35px;
+  width:90%;
+  border-radius: 9px;
+  background-color: #eee;
+}
+
+.setting-view {
+  margin-top:15rpx;
+  margin-left:auto;
+  margin-right:auto;
+  margin-bottom:15rpx;
+}
+
+.text-view {
+  margin-right:30rpx;
+}
+
+.submit-button {
+  width: 35%;
+  margin-top: 50rpx;
+  margin-left: 10rpx;
+  float:left;
+}
+
+.reset-button {
+  width: 35%;
+  margin-top: 50rpx;
+  margin-right: 10rpx;
+  float:right;
+}

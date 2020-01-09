@@ -1,0 +1,27 @@
+<!--index.wxml-->
+<view class="page">
+  <view class="page-bottom">
+    <view class="page-content">
+      <view class="page-list">
+        <text class="page-list-title">设备列表\n</text>
+      </view>
+      <view bindtap="selectNav" wx:for-items="{{devList}}" wx:key="deviceId" data-dev-id="{{item.deviceId}}" class="page-list">
+          <text>{{item.name}} [{{item.deviceId}}]</text>
+      </view>
+    </view>
+  </view>
+  <view class="page-top {{navOpen ? 'page-state' : ''}}">
+    <view class="page-mask {{navOpen ? '' : 'page-mask-show'}}" bindtap="closeNav"></view>
+    <view class="container">
+      <view class="cover">
+        <image class="cover-image" src="index.png" background-size="cover"></image>
+      </view>
+      <view class="prompt">
+        <text class="prompt-text">{{prompt}}</text>
+      </view>
+      <view class="input">
+        <button class="search-button" bindtap="searchBtn">{{buttonText}}</button>
+      </view>
+    </view>
+  </view>
+</view>
