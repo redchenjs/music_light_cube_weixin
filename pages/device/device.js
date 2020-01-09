@@ -124,33 +124,36 @@ Page({
     wx.showModal({
       title: '提示',
       content: '确认重设配置',
+      showCancel: true,
       success: function (res) {
-        wx.showLoading({
-          title: '数据同步中',
-          mask: true
-        });
+        if (res.confirm) {
+          wx.showLoading({
+            title: '数据同步中',
+            mask: true
+          });
 
-        let buffer = new ArrayBuffer(1);
-        let dataView = new DataView(buffer);
+          let buffer = new ArrayBuffer(1);
+          let dataView = new DataView(buffer);
 
-        dataView.setUint8(0, 0xEF);
+          dataView.setUint8(0, 0xEF);
 
-        wx.writeBLECharacteristicValue({
-          deviceId: that.data.devId,
-          serviceId: serviceIdA,
-          characteristicId: characteristicIdA,
-          value: buffer,
-          success(res) {
-            that.setData({
-              recvMask: 0x2
-            });
-            wx.readBLECharacteristicValue({
-              deviceId: that.data.devId,
-              serviceId: serviceIdA,
-              characteristicId: characteristicIdA
-            });
-          }
-        });
+          wx.writeBLECharacteristicValue({
+            deviceId: that.data.devId,
+            serviceId: serviceIdA,
+            characteristicId: characteristicIdA,
+            value: buffer,
+            success(res) {
+              that.setData({
+                recvMask: 0x2
+              });
+              wx.readBLECharacteristicValue({
+                deviceId: that.data.devId,
+                serviceId: serviceIdA,
+                characteristicId: characteristicIdA
+              });
+            }
+          });
+        }
       }
     });
   },
