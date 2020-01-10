@@ -34,51 +34,50 @@ Page({
 
     if (that.data.discovering == false) {
       wx.closeBluetoothAdapter({
+        // 关闭蓝牙适配器完成
         complete(res) {
           console.log(res.errMsg);
           wx.openBluetoothAdapter({
+            // 打开蓝牙适配器成功
             success(res) {
               wx.onBluetoothAdapterStateChange(function (res) {
                 that.setData({
                   available: res.available,
                   discovering: res.discovering,
-                })
+                });
                 if (that.data.available == false) {
                   that.setData({
                     prompt: '蓝牙已关闭',
                     buttonText: '搜索设备'
-                  })
+                  });
                 } else {
                   if (that.data.discovering == false) {
                     if (that.data.cancelled == false) {
                       that.setData({
-                        prompt: '搜索完成',
-                        navOpen: true,
-                        buttonText: '重新搜索'
-                      })
-                    } else {
-                      that.setData({
-                        prompt: '未连接',
-                        buttonText: '搜索设备'
-                      })
+                        navOpen: true
+                      });
                     }
+                    that.setData({
+                      prompt: '未连接',
+                      buttonText: '搜索设备'
+                    });
                   } else {
                     that.setData({
                       prompt: '搜索中...',
                       devList: [],
                       cancelled: false,
                       buttonText: '取消搜索'
-                    })
+                    });
                   }
                 }
-              })
+              });
 
               wx.startBluetoothDevicesDiscovery({
                 allowDuplicatesKey: false,
                 complete(res) {
                   console.log(res.errMsg);
                 }
-              })
+              });
 
               wx.onBluetoothDeviceFound(function (res) {
                 that.setData({
@@ -94,8 +93,9 @@ Page({
                     console.log(res.errMsg);
                   }
                 });
-              })
+              });
             },
+            // 打开蓝牙适配器失败
             fail: function (res) {
               wx.showModal({
                 title: '提示',
@@ -112,6 +112,7 @@ Page({
                 }
               });
             },
+            // 打开蓝牙适配器完成
             complete(res) {
               console.log(res.errMsg);
             }
@@ -119,6 +120,9 @@ Page({
         }
       });
     } else {
+      that.setData({
+        cancelled: true
+      });
       wx.stopBluetoothDevicesDiscovery({
         complete(res) {
           console.log(res.errMsg);
@@ -128,9 +132,6 @@ Page({
         complete(res) {
           console.log(res.errMsg);
         }
-      });
-      that.setData({
-        cancelled: true,
       });
     }
   },

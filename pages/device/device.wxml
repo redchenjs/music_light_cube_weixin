@@ -24,9 +24,9 @@
       <view class="setting-view">
         <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="999" show-value/>
       </view>
-    <text class="setting-title">色阶</text>
+    <text class="setting-title">亮度</text>
       <view class="setting-view">
-        <slider disabled="{{!devHasVfx}}" bindchange="colorScaleSliderChange" value="{{vfxColorScale}}" min="0" max="511" show-value/>
+        <slider disabled="{{!devHasVfx}}" bindchange="lightnessSliderChange" value="{{vfxLightness}}" min="0" max="511" show-value/>
       </view>
     <text class="setting-title">背光</text>
       <view class="setting-view">

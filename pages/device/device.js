@@ -3,24 +3,26 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 
-const serviceIdA = "000000EE-0000-1000-8000-00805F9B34FB";
-const characteristicIdA = "0000EE01-0000-1000-8000-00805F9B34FB";
-
-const serviceIdB = "000000FF-0000-1000-8000-00805F9B34FB";
-const characteristicIdB = "0000FF01-0000-1000-8000-00805F9B34FB";
+// 设备配置服务
+const serviceIdA = "000000AA-0000-1000-8000-00805F9B34FB";
+const characteristicIdA = "0000AA01-0000-1000-8000-00805F9B34FB";
+// 固件版本服务
+const serviceIdB = "000000BB-0000-1000-8000-00805F9B34FB";
+const characteristicIdB = "0000BB02-0000-1000-8000-00805F9B34FB";
 
 Page({
   data: {
     devId: '',
     devVer: '',
     recvMask: 0x0,
+    cancelled: false,
     devHasVfx: false,
     devHasAin: false,
     devHasBlk: false,
     devIsCube: false,
     vfxMode: 0x0,
     vfxScaleFactor: 0x0,
-    vfxColorScale: 0x0,
+    vfxLightness: 0x0,
     vfxBacklight: 0x0,
     vfxAudioInput: false,
     vfxModeList: [
@@ -68,9 +70,9 @@ Page({
     });
   },
   // 色阶滑块事件
-  colorScaleSliderChange: function (e) {
+  lightnessSliderChange: function (e) {
     this.setData({
-      vfxColorScale: e.detail.value
+      vfxLightness: e.detail.value
     });
   },
   // 背光滑块事件
@@ -101,11 +103,12 @@ Page({
     dataView.setUint8(1, that.data.vfxMode);
     dataView.setUint8(2, that.data.vfxScaleFactor >> 8);
     dataView.setUint8(3, that.data.vfxScaleFactor & 0xFF);
-    dataView.setUint8(4, that.data.vfxColorScale >> 8);
-    dataView.setUint8(5, that.data.vfxColorScale & 0xFF);
+    dataView.setUint8(4, that.data.vfxLightness >> 8);
+    dataView.setUint8(5, that.data.vfxLightness & 0xFF);
     dataView.setUint8(6, that.data.vfxBacklight);
     dataView.setUint8(7, that.data.vfxAudioInput);
 
+    // 写设备配置
     wx.writeBLECharacteristicValue({
       deviceId: that.data.devId,
       serviceId: serviceIdA,
@@ -137,6 +140,7 @@ Page({
 
           dataView.setUint8(0, 0xEF);
 
+          // 写重设命令
           wx.writeBLECharacteristicValue({
             deviceId: that.data.devId,
             serviceId: serviceIdA,
@@ -146,11 +150,18 @@ Page({
               that.setData({
                 recvMask: 0x2
               });
+              // 回读新配置
               wx.readBLECharacteristicValue({
                 deviceId: that.data.devId,
                 serviceId: serviceIdA,
-                characteristicId: characteristicIdA
+                characteristicId: characteristicIdA,
+                complete(res) {
+                  console.log(res.errMsg);
+                }
               });
+            },
+            complete(res) {
+              console.log(res.errMsg);
             }
           });
         }
@@ -171,60 +182,67 @@ Page({
     });
 
     wx.closeBluetoothAdapter({
+      // 关闭蓝牙适配器完成
       complete(res) {
         console.log(res.errMsg);
         wx.openBluetoothAdapter({
+          // 打开蓝牙适配器成功
           success(res) {
             wx.createBLEConnection({
               deviceId: that.data.devId,
+              // 创建BLE连接成功
               success(res) {
+                // 读设备配置
                 wx.readBLECharacteristicValue({
                   deviceId: that.data.devId,
                   serviceId: serviceIdA,
                   characteristicId: characteristicIdA,
-                  failed(res) {
-                    wx.hideLoading();
-                    wx.showModal({
-                      title: '提示',
-                      content: '不支持该设备',
-                      showCancel: false,
-                      success: function (res) {
-                        wx.navigateBack({
-                          delta: 1
-                        });
-                      }
-                    });
+                  complete(res) {
+                    console.log(res.errMsg);
                   }
                 });
-
+                // 读固件版本
                 wx.readBLECharacteristicValue({
                   deviceId: that.data.devId,
                   serviceId: serviceIdB,
                   characteristicId: characteristicIdB,
-                  failed(res) {
+                  fail(res) {
                     wx.hideLoading();
                     wx.showModal({
                       title: '提示',
                       content: '不支持该设备',
                       showCancel: false,
                       success: function (res) {
+                        that.setData({
+                          cancelled: true
+                        });
                         wx.navigateBack({
                           delta: 1
                         });
                       }
                     });
+                  },
+                  complete(res) {
+                    console.log(res.errMsg);
                   }
                 });
-
+                // 数据到达回调
                 wx.onBLECharacteristicValueChange(function (res) {
+                  // 设备配置信息
                   if (res.characteristicId == characteristicIdA) {
                     let data = new Uint8Array(res.value);
+                    /*
+                        BTT0: VFX Enabled
+                        BIT1: Backlight Enabled
+                        BIT2: Cube Mode Enabled
+                        BIT3: Audio Input Enabled
+                    */
                     if (data[0] & 0x01) {
                       that.setData({
                         devHasVfx: true,
                         vfxMode: data[1],
                         vfxScaleFactor: data[2] << 8 | data[3],
-                        vfxColorScale: data[4] << 8 | data[5]
+                        vfxLightness: data[4] << 8 | data[5]
                       });
                     }
                     if (data[0] & 0x02) {
@@ -252,24 +270,43 @@ Page({
                       recvMask: that.data.recvMask | 0x1
                     });
                   }
+                  // 固件版本信息
                   if (res.characteristicId == characteristicIdB) {
                     that.setData({
                       devVer: util.ab2str(res.value),
                       recvMask: that.data.recvMask | 0x2
                     });
                   }
+                  // 数据接收完毕
                   if (that.data.recvMask == 0x3) {
                     wx.hideLoading();
                   }
                 });
               },
+              // 创建BLE连接失败
+              fail: function (res) {
+                wx.hideLoading();
+                wx.showModal({
+                  title: '提示',
+                  content: '无法连接到设备',
+                  showCancel: false,
+                  success: function (res) {
+                    wx.navigateBack({
+                      delta: 1
+                    });
+                  }
+                });
+              },
+              // 创建BLE连接完成
               complete(res) {
                 console.log(res.errMsg);
               }
             });
-
+            // BLE链路状态回调
             wx.onBLEConnectionStateChange(function (res) {
-              if (that.data.devId != '' && res.connected == false) {
+              // 链路中断
+              if (that.data.cancelled == false && res.connected == false) {
+                wx.hideLoading();
                 wx.showModal({
                   title: '提示',
                   content: '与设备连接中断',
@@ -283,10 +320,12 @@ Page({
               }
             });
           },
+          // 打开蓝牙适配器失败
           fail: function (res) {
+            wx.hideLoading();
             wx.showModal({
               title: '提示',
-              content: '无法连接到设备',
+              content: '请检查手机蓝牙是否打开',
               showCancel: false,
               success: function (res) {
                 wx.navigateBack({
@@ -295,6 +334,7 @@ Page({
               }
             });
           },
+          // 打开蓝牙适配器完成
           complete(res) {
             console.log(res.errMsg);
           }
@@ -304,14 +344,19 @@ Page({
   },
   // 页面卸载事件
   onUnload: function () {
-    wx.closeBluetoothAdapter({
+    this.setData({
+      cancelled: true
+    });
+    wx.closeBLEConnection({
+      deviceId: this.data.devId,
       complete(res) {
         console.log(res.errMsg);
       }
     });
-    this.setData({
-      devId: '',
-      devVer: ''
+    wx.closeBluetoothAdapter({
+      complete(res) {
+        console.log(res.errMsg);
+      }
     });
   }
 });
