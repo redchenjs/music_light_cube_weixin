@@ -22,7 +22,7 @@
     </block>
     <text class="setting-title">缩放系数</text>
       <view class="setting-view">
-        <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="999" show-value/>
+        <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="511" show-value/>
       </view>
     <text class="setting-title">亮度</text>
       <view class="setting-view">
