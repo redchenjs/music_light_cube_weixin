@@ -78,7 +78,7 @@ page,.page {
   border-radius: 50%;
 }
 
-.prompt {
+.text-view {
   margin-top: 50rpx;
 }
 
@@ -86,8 +86,7 @@ page,.page {
   color: #aaa;
 }
 
-.input {
-  width: 300rpx;
+.button-view {
   margin: 75rpx;
 }
 

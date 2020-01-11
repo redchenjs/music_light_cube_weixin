@@ -16,10 +16,10 @@
       <view class="cover">
         <image class="cover-image" src="index.png" background-size="cover"></image>
       </view>
-      <view class="prompt">
+      <view class="text-view">
         <text class="prompt-text">{{prompt}}</text>
       </view>
-      <view class="input">
+      <view class="button-view">
         <button class="search-button" bindtap="searchBtn">{{buttonText}}</button>
       </view>
     </view>

@@ -9,9 +9,9 @@
     </view>
   </view>
   <view class="settings">
-    <text class="text-view">特效样式</text>
+    <text class="setting-title">特效样式</text>
     <block wx:if="{{!devIsCube}}">
-      <view class="input">
+      <view class="input-view">
         <input disabled="{{!devHasVfx}}" class="inputbox" bindinput="vfxModeInput" maxlength="3" type="number" value="{{vfxMode}}" placeholder="样式" />
       </view>
     </block>
@@ -21,24 +21,24 @@
       </picker>
     </block>
     <text class="setting-title">缩放系数</text>
-      <view class="setting-view">
-        <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="511" show-value/>
-      </view>
-    <text class="setting-title">亮度</text>
-      <view class="setting-view">
-        <slider disabled="{{!devHasVfx}}" bindchange="lightnessSliderChange" value="{{vfxLightness}}" min="0" max="511" show-value/>
-      </view>
-    <text class="setting-title">背光</text>
-      <view class="setting-view">
-        <slider disabled="{{!devHasBlk}}" bindchange="backlightSliderChange" value="{{vfxBacklight}}" min="0" max="255" show-value/>
-      </view>
-    </view>
     <view class="setting-view">
-      <text class="text-view">音频输入</text>
-      <switch disabled="{{!devHasAin}}" checked="{{vfxAudioInput}}" bindchange="audioInputSwitchChange"/>
+      <slider disabled="{{!devHasVfx}}" bindchange="scaleFactorSliderChange" value="{{vfxScaleFactor}}" min="0" max="511" show-value/>
     </view>
-  <view class="input">
-    <button disabled="{{!devHasVfx}}" class="reset-button" bindtap="resetBtn">重设</button>
-    <button disabled="{{!devHasVfx}}" class="submit-button" bindtap="submitBtn">提交</button>
+    <text class="setting-title">亮度</text>
+    <view class="setting-view">
+      <slider disabled="{{!devHasVfx}}" bindchange="lightnessSliderChange" value="{{vfxLightness}}" min="0" max="511" show-value/>
+    </view>
+    <text class="setting-title">背光</text>
+    <view class="setting-view">
+      <slider disabled="{{!devHasBlk}}" bindchange="backlightSliderChange" value="{{vfxBacklight}}" min="0" max="255" show-value/>
+    </view>
+  </view>
+  <view class="setting-view">
+    <text class="setting-title">音频输入</text>
+    <switch disabled="{{!devHasAin}}" checked="{{vfxAudioInput}}" bindchange="audioInputSwitchChange"/>
+  </view>
+  <view class="button-view">
+    <button disabled="{{!devHasVfx}}" type="primary" class="submit-button" bindtap="submitBtn">提交</button>
+    <button disabled="{{!devHasVfx}}" type="warn" class="reset-button" bindtap="resetBtn">重设</button>
   </view>
 </view>

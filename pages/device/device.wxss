@@ -1,5 +1,9 @@
 /* device.wxss */
 
+.container {
+  padding: 25rpx 0;
+}
+
 .info {
   margin-left:auto;
   margin-right:auto;
@@ -22,7 +26,7 @@
   width:95%;
 }
 
-.input {
+.input-view {
   margin-left:auto;
   margin-right:auto;
 }
@@ -52,6 +56,10 @@
   background-color: #eee;
 }
 
+.setting-title {
+  margin-right:30rpx;
+}
+
 .setting-view {
   margin-top:15rpx;
   margin-left:auto;
@@ -59,20 +67,18 @@
   margin-bottom:15rpx;
 }
 
-.text-view {
-  margin-right:30rpx;
-}
-
-.reset-button {
-  width: 35%;
-  margin-top: 50rpx;
-  margin-left: 10rpx;
-  float:left;
+.button-view {
+  margin: 75rpx;
 }
 
 .submit-button {
-  width: 35%;
-  margin-top: 50rpx;
-  margin-right: 10rpx;
-  float:right;
+  margin-top: 5rpx;
+  margin-left: 25rpx;
+  margin-right: 25rpx;
+}
+
+.reset-button {
+  margin-top: 25rpx;
+  margin-left: 25rpx;
+  margin-right: 25rpx;
 }
