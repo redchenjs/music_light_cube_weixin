@@ -12,12 +12,12 @@
     <text class="setting-title">特效样式</text>
     <block wx:if="{{!devIsCube}}">
       <view class="input-view">
-        <input disabled="{{!devHasVfx}}" class="inputbox" bindinput="vfxModeInput" maxlength="3" type="number" value="{{vfxMode}}" placeholder="样式" />
+        <input disabled="{{!devHasVfx}}" class="inputbox" bindinput="vfxModeInput" maxlength="3" type="number" value="{{vfxModeIdx}}" placeholder="样式" />
       </view>
     </block>
     <block wx:if="{{devIsCube}}">
-      <picker disabled="{{!devHasVfx}}" bindchange="vfxModePickerChange" value="{{vfxMode}}" range="{{vfxModeList}}" range-key="name">
-        <view class="picker-view">{{vfxModeList[vfxMode].name}}</view>
+      <picker disabled="{{!devHasVfx}}" bindchange="vfxModePickerChange" value="{{vfxModeIdx}}" range="{{vfxModeList}}" range-key="name">
+        <view class="picker-view">{{vfxModeList[vfxModeIdx].name}}</view>
       </picker>
     </block>
     <text class="setting-title">缩放系数</text>

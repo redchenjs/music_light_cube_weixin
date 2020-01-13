@@ -20,23 +20,23 @@ Page({
     devHasAin: false,
     devHasBlk: false,
     devIsCube: false,
-    vfxMode: 0x0,
+    vfxModeIdx: 0x0,
     vfxScaleFactor: 0x0,
     vfxLightness: 0x0,
     vfxBacklight: 0x0,
     vfxAudioInput: false,
     vfxModeList: [
-      { id: 0x00, name: '关闭' },
-      { id: 0x01, name: '渐变-点' },
-      { id: 0x02, name: '渐变-面' },
-      { id: 0x03, name: '渐变-体' },
+      { id: 0x00, name: '随机' },
+      { id: 0x01, name: '彩虹' },
+      { id: 0x02, name: '彩带' },
+      { id: 0x03, name: '渐变' },
       { id: 0x04, name: '呼吸' },
       { id: 0x05, name: '星空-紫红' },
-      { id: 0x06, name: '星空-青蓝' },
-      { id: 0x07, name: '星空-黄绿' },
+      { id: 0x06, name: '星空-黄绿' },
+      { id: 0x07, name: '星空-青蓝' },
       { id: 0x08, name: '数字-固定' },
       { id: 0x09, name: '数字-滚动' },
-      { id: 0x0A, name: '跳跃飞毯' },
+      { id: 0x0A, name: '魔毯' },
       { id: 0x0B, name: '旋转曲面-正' },
       { id: 0x0C, name: '旋转曲面-反' },
       { id: 0x0D, name: '音乐喷泉-静态-对数' },
@@ -45,6 +45,8 @@ Page({
       { id: 0x10, name: '音乐喷泉-静态-线性' },
       { id: 0x11, name: '音乐喷泉-渐变-线性' },
       { id: 0x12, name: '音乐喷泉-螺旋-线性' },
+      { id: 0xFE, name: '暂停' },
+      { id: 0xFF, name: '关闭' },
     ],
   },
   // 特效样式输入事件
@@ -54,13 +56,13 @@ Page({
       value = 255;
     }
     this.setData({
-      vfxMode: value
+      vfxModeIdx: value
     });
   },
   // 特效样式选择事件
   vfxModePickerChange: function (e) {
     this.setData({
-      vfxMode: e.detail.value
+      vfxModeIdx: e.detail.value
     });
   },
   // 缩放系数滑块事件
@@ -100,7 +102,11 @@ Page({
     let dataView = new DataView(buffer);
 
     dataView.setUint8(0, 0xEF);
-    dataView.setUint8(1, that.data.vfxMode);
+    if (that.data.devIsCube == true) {
+      dataView.setUint8(1, that.data.vfxModeList[that.data.vfxModeIdx].id);
+    } else {
+      dataView.setUint8(1, that.data.vfxModeIdx);
+    }
     dataView.setUint8(2, that.data.vfxScaleFactor >> 8);
     dataView.setUint8(3, that.data.vfxScaleFactor & 0xFF);
     dataView.setUint8(4, that.data.vfxLightness >> 8);
@@ -240,7 +246,6 @@ Page({
                     if (data[0] & 0x01) {
                       that.setData({
                         devHasVfx: true,
-                        vfxMode: data[1],
                         vfxScaleFactor: data[2] << 8 | data[3],
                         vfxLightness: data[4] << 8 | data[5]
                       });
@@ -253,7 +258,12 @@ Page({
                     }
                     if (data[0] & 0x04) {
                       that.setData({
-                        devIsCube: true
+                        devIsCube: true,
+                        vfxModeIdx: that.data.vfxModeList.findIndex(function (e) { return e.id == data[1]; })
+                      });
+                    } else {
+                      that.setData({
+                        vfxModeIdx: data[1]
                       });
                     }
                     if (data[0] & 0x08) {
