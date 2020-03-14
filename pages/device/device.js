@@ -4,11 +4,11 @@ const app = getApp();
 const util = require('../../utils/util.js');
 
 // 设备配置服务
-const serviceIdA = "000000AA-0000-1000-8000-00805F9B34FB";
-const characteristicIdA = "0000AA01-0000-1000-8000-00805F9B34FB";
+const vfxServiceId = "000000AA-0000-1000-8000-00805F9B34FB";
+const vfxCharacteristicId = "0000AA01-0000-1000-8000-00805F9B34FB";
 // 固件版本服务
-const serviceIdB = "000000BB-0000-1000-8000-00805F9B34FB";
-const characteristicIdB = "0000BB02-0000-1000-8000-00805F9B34FB";
+const verServiceId = "000000BB-0000-1000-8000-00805F9B34FB";
+const verCharacteristicId = "0000BB02-0000-1000-8000-00805F9B34FB";
 
 Page({
   data: {
@@ -117,8 +117,8 @@ Page({
     // 写设备配置
     wx.writeBLECharacteristicValue({
       deviceId: that.data.devId,
-      serviceId: serviceIdA,
-      characteristicId: characteristicIdA,
+      serviceId: vfxServiceId,
+      characteristicId: vfxCharacteristicId,
       value: buffer,
       complete(res) {
         wx.hideLoading();
@@ -149,8 +149,8 @@ Page({
           // 写重设命令
           wx.writeBLECharacteristicValue({
             deviceId: that.data.devId,
-            serviceId: serviceIdA,
-            characteristicId: characteristicIdA,
+            serviceId: vfxServiceId,
+            characteristicId: vfxCharacteristicId,
             value: buffer,
             success(res) {
               that.setData({
@@ -159,8 +159,8 @@ Page({
               // 回读新配置
               wx.readBLECharacteristicValue({
                 deviceId: that.data.devId,
-                serviceId: serviceIdA,
-                characteristicId: characteristicIdA,
+                serviceId: vfxServiceId,
+                characteristicId: vfxCharacteristicId,
                 complete(res) {
                   console.log(res.errMsg);
                 }
@@ -201,8 +201,8 @@ Page({
                 // 读设备配置
                 wx.readBLECharacteristicValue({
                   deviceId: that.data.devId,
-                  serviceId: serviceIdA,
-                  characteristicId: characteristicIdA,
+                  serviceId: vfxServiceId,
+                  characteristicId: vfxCharacteristicId,
                   complete(res) {
                     console.log(res.errMsg);
                   }
@@ -210,8 +210,8 @@ Page({
                 // 读固件版本
                 wx.readBLECharacteristicValue({
                   deviceId: that.data.devId,
-                  serviceId: serviceIdB,
-                  characteristicId: characteristicIdB,
+                  serviceId: verServiceId,
+                  characteristicId: verCharacteristicId,
                   fail(res) {
                     wx.hideLoading();
                     wx.showModal({
@@ -235,7 +235,7 @@ Page({
                 // 数据到达回调
                 wx.onBLECharacteristicValueChange(function (res) {
                   // 设备配置信息
-                  if (res.characteristicId == characteristicIdA) {
+                  if (res.characteristicId == vfxCharacteristicId) {
                     let data = new Uint8Array(res.value);
                     /*
                         BTT0: VFX Enabled
@@ -281,7 +281,7 @@ Page({
                     });
                   }
                   // 固件版本信息
-                  if (res.characteristicId == characteristicIdB) {
+                  if (res.characteristicId == verCharacteristicId) {
                     that.setData({
                       devVer: util.ab2str(res.value),
                       recvMask: that.data.recvMask | 0x2
