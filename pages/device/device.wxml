@@ -38,7 +38,7 @@
     <switch disabled="{{!devHasAin}}" checked="{{vfxAudioInput}}" bindchange="audioInputSwitchChange"/>
   </view>
   <view class="button-view">
-    <button disabled="{{!devHasVfx}}" type="primary" class="submit-button" bindtap="submitBtn">提交</button>
-    <button disabled="{{!devHasVfx}}" type="warn" class="reset-button" bindtap="resetBtn">重设</button>
+    <button disabled="{{!devHasVfx & !devHasBlk}}" type="primary" class="submit-button" bindtap="submitBtn">提交</button>
+    <button disabled="{{!devHasVfx & !devHasBlk}}" type="warn" class="reset-button" bindtap="resetBtn">重设</button>
   </view>
 </view>
