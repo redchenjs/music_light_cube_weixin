@@ -3,12 +3,12 @@
 const app = getApp();
 const util = require('../../utils/util.js');
 
+// 固件更新服务
+const otaServiceId = "0000FF52-0000-1000-8000-00805F9B34FB";
+const otaCharacteristicId = "00005201-0000-1000-8000-00805F9B34FB";
 // 设备配置服务
-const vfxServiceId = "000000AA-0000-1000-8000-00805F9B34FB";
-const vfxCharacteristicId = "0000AA01-0000-1000-8000-00805F9B34FB";
-// 固件版本服务
-const verServiceId = "000000BB-0000-1000-8000-00805F9B34FB";
-const verCharacteristicId = "0000BB02-0000-1000-8000-00805F9B34FB";
+const vfxServiceId = "0000FF53-0000-1000-8000-00805F9B34FB";
+const vfxCharacteristicId = "00005301-0000-1000-8000-00805F9B34FB";
 
 Page({
   data: {
@@ -210,8 +210,8 @@ Page({
                 // 读固件版本
                 wx.readBLECharacteristicValue({
                   deviceId: that.data.devId,
-                  serviceId: verServiceId,
-                  characteristicId: verCharacteristicId,
+                  serviceId: otaServiceId,
+                  characteristicId: otaCharacteristicId,
                   fail(res) {
                     wx.hideLoading();
                     wx.showModal({
@@ -281,7 +281,7 @@ Page({
                     });
                   }
                   // 固件版本信息
-                  if (res.characteristicId == verCharacteristicId) {
+                  if (res.characteristicId == otaCharacteristicId) {
                     that.setData({
                       devVer: util.ab2str(res.value),
                       recvMask: that.data.recvMask | 0x2
