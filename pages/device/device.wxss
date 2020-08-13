@@ -5,14 +5,14 @@
 }
 
 .info {
-  margin-left:auto;
-  margin-right:auto;
+  margin-left: auto;
+  margin-right: auto;
   width: 95%;
 }
 
 .info-view {
-  margin-top:15rpx;
-  margin-bottom:15rpx;
+  margin-top: 15rpx;
+  margin-bottom: 15rpx;
 }
 
 .info-text {
@@ -20,51 +20,48 @@
 }
 
 .settings {
-  margin-top:50rpx;
-  margin-left:auto;
-  margin-right:auto;
-  width:95%;
+  margin-top: 50rpx;
+  margin-left: auto;
+  margin-right: auto;
+  width: 95%;
 }
 
 .input-view {
-  margin-left:auto;
-  margin-right:auto;
+  margin-top: 15rpx;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15rpx;
+  width: 90%;
 }
 
 .inputbox {
-  margin-top: 25rpx;
-  margin-left:auto;
-  margin-right:auto;
-  margin-bottom:27rpx;
-  text-align:center;
-  width:90%;
-  border-width: 1rpx 1rpx 1rpx 1rpx;
-  border-color: #aaa;
-  border-style: solid;
+  text-align: center;
+  height: 55rpx;
   border-radius: 9rpx;
+  background-color: #eee;
 }
 
 .picker-view {
-  margin-top:15rpx;
-  margin-left:auto;
-  margin-right:auto;
-  margin-bottom:15rpx;
-  text-align:center;
-  line-height:35px;
-  width:90%;
-  border-radius: 9px;
+  margin-top: 15rpx;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15rpx;
+  text-align: center;
+  line-height: 55rpx;
+  width: 90%;
+  border-radius: 9rpx;
   background-color: #eee;
 }
 
 .setting-title {
-  margin-right:30rpx;
+  margin-right: 30rpx;
 }
 
 .setting-view {
-  margin-top:15rpx;
-  margin-left:auto;
-  margin-right:auto;
-  margin-bottom:15rpx;
+  margin-top: 15rpx;
+  margin-left: auto;
+  margin-right: auto;
+  margin-bottom: 15rpx;
 }
 
 .button-view {
