@@ -46,11 +46,11 @@ Page({
       { id: 0x11, name: '音乐喷泉-渐变-对数' },
       { id: 0x12, name: '音乐喷泉-螺旋-对数' },
       { id: 0xFE, name: '暂停' },
-      { id: 0xFF, name: '关闭' },
-    ],
+      { id: 0xFF, name: '关闭' }
+    ]
   },
   // 特效样式输入事件
-  vfxModeInput: function (e) {
+  vfxModeInput: function(e) {
     let value = e.detail.value;
     if (value > 255) {
       value = 255;
@@ -60,31 +60,31 @@ Page({
     });
   },
   // 特效样式选择事件
-  vfxModePickerChange: function (e) {
+  vfxModePickerChange: function(e) {
     this.setData({
       vfxModeIdx: e.detail.value
     });
   },
   // 缩放系数滑块事件
-  scaleFactorSliderChange: function (e) {
+  scaleFactorSliderChange: function(e) {
     this.setData({
       vfxScaleFactor: e.detail.value
     });
   },
-  // 色阶滑块事件
-  lightnessSliderChange: function (e) {
+  // 亮度滑块事件
+  lightnessSliderChange: function(e) {
     this.setData({
       vfxLightness: e.detail.value
     });
   },
   // 背光滑块事件
-  backlightSliderChange: function (e) {
+  backlightSliderChange: function(e) {
     this.setData({
       vfxBacklight: e.detail.value
     });
   },
   // 音频输入开关事件
-  audioInputSwitchChange: function (e) {
+  audioInputSwitchChange: function(e) {
     this.setData({
       vfxAudioInput: e.detail.value
     });
@@ -127,14 +127,14 @@ Page({
     });
   },
   // 重设按钮事件
-  resetBtn: function () {
+  resetBtn: function() {
     let that = this;
 
     wx.showModal({
       title: '提示',
       content: '确认重设配置',
       showCancel: true,
-      success: function (res) {
+      success: function(res) {
         if (res.confirm) {
           wx.showLoading({
             title: '数据同步中',
@@ -179,7 +179,7 @@ Page({
     let that = this;
 
     that.setData({
-      devId: e.devId,
+      devId: e.devId
     });
 
     wx.showLoading({
@@ -218,7 +218,7 @@ Page({
                       title: '提示',
                       content: '不支持该设备',
                       showCancel: false,
-                      success: function (res) {
+                      success: function(res) {
                         that.setData({
                           cancelled: true
                         });
@@ -233,7 +233,7 @@ Page({
                   }
                 });
                 // 数据到达回调
-                wx.onBLECharacteristicValueChange(function (res) {
+                wx.onBLECharacteristicValueChange(function(res) {
                   // 设备配置信息
                   if (res.characteristicId == vfxCharacteristicId) {
                     let data = new Uint8Array(res.value);
@@ -253,7 +253,7 @@ Page({
                     if (data[0] & 0x02) {
                       that.setData({
                         devIsCube: true,
-                        vfxModeIdx: that.data.vfxModeList.findIndex(function (e) { return e.id == data[1]; })
+                        vfxModeIdx: that.data.vfxModeList.findIndex(function(e) {return e.id == data[1];})
                       });
                     } else {
                       that.setData({
@@ -294,13 +294,13 @@ Page({
                 });
               },
               // 创建BLE连接失败
-              fail: function (res) {
+              fail: function(res) {
                 wx.hideLoading();
                 wx.showModal({
                   title: '提示',
                   content: '无法连接到设备',
                   showCancel: false,
-                  success: function (res) {
+                  success: function(res) {
                     wx.navigateBack({
                       delta: 1
                     });
@@ -313,7 +313,7 @@ Page({
               }
             });
             // BLE链路状态回调
-            wx.onBLEConnectionStateChange(function (res) {
+            wx.onBLEConnectionStateChange(function(res) {
               // 链路中断
               if (that.data.cancelled == false && res.connected == false) {
                 wx.hideLoading();
@@ -321,7 +321,7 @@ Page({
                   title: '提示',
                   content: '与设备连接中断',
                   showCancel: false,
-                  success: function (res) {
+                  success: function(res) {
                     wx.navigateBack({
                       delta: 1
                     });
@@ -331,13 +331,13 @@ Page({
             });
           },
           // 打开蓝牙适配器失败
-          fail: function (res) {
+          fail: function(res) {
             wx.hideLoading();
             wx.showModal({
               title: '提示',
               content: '请检查手机蓝牙是否打开',
               showCancel: false,
-              success: function (res) {
+              success: function(res) {
                 wx.navigateBack({
                   delta: 1
                 });
@@ -353,7 +353,7 @@ Page({
     });
   },
   // 页面卸载事件
-  onUnload: function () {
+  onUnload: function() {
     this.setData({
       cancelled: true
     });
