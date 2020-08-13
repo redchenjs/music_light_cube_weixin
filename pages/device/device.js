@@ -17,9 +17,9 @@ Page({
     recvMask: 0x0,
     cancelled: false,
     devHasVfx: false,
-    devHasAin: false,
-    devHasBlk: false,
     devIsCube: false,
+    devHasBlk: false,
+    devHasAin: false,
     vfxModeIdx: 0x0,
     vfxScaleFactor: 0x0,
     vfxLightness: 0x0,
@@ -239,8 +239,8 @@ Page({
                     let data = new Uint8Array(res.value);
                     /*
                         BTT0: VFX Enabled
-                        BIT1: Backlight Enabled
-                        BIT2: Cube Mode Enabled
+                        BIT1: Cube Mode Enabled
+                        BIT2: Backlight Enabled
                         BIT3: Audio Input Enabled
                     */
                     if (data[0] & 0x01) {
@@ -252,18 +252,18 @@ Page({
                     }
                     if (data[0] & 0x02) {
                       that.setData({
-                        devHasBlk: true,
-                        vfxBacklight: data[6]
-                      });
-                    }
-                    if (data[0] & 0x04) {
-                      that.setData({
                         devIsCube: true,
                         vfxModeIdx: that.data.vfxModeList.findIndex(function (e) { return e.id == data[1]; })
                       });
                     } else {
                       that.setData({
                         vfxModeIdx: data[1]
+                      });
+                    }
+                    if (data[0] & 0x04) {
+                      that.setData({
+                        devHasBlk: true,
+                        vfxBacklight: data[6]
                       });
                     }
                     if (data[0] & 0x08) {
