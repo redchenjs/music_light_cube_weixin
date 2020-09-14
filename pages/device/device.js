@@ -4,11 +4,11 @@ const app = getApp();
 const util = require('../../utils/util.js');
 
 // 固件更新服务
-const otaServiceId = "0000FF52-0000-1000-8000-00805F9B34FB";
-const otaCharacteristicId = "00005201-0000-1000-8000-00805F9B34FB";
+const otaServiceId = '0000FF52-0000-1000-8000-00805F9B34FB';
+const otaCharacteristicId = '00005201-0000-1000-8000-00805F9B34FB';
 // 设备配置服务
-const vfxServiceId = "0000FF53-0000-1000-8000-00805F9B34FB";
-const vfxCharacteristicId = "00005301-0000-1000-8000-00805F9B34FB";
+const vfxServiceId = '0000FF53-0000-1000-8000-00805F9B34FB';
+const vfxCharacteristicId = '00005301-0000-1000-8000-00805F9B34FB';
 
 Page({
   data: {
@@ -102,7 +102,7 @@ Page({
     let dataView = new DataView(buffer);
 
     dataView.setUint8(0, 0xEF);
-    if (that.data.devIsCube == true) {
+    if (that.data.devIsCube) {
       dataView.setUint8(1, that.data.vfxModeList[that.data.vfxModeIdx].id);
     } else {
       dataView.setUint8(1, that.data.vfxModeIdx);
@@ -187,155 +187,29 @@ Page({
       mask: true
     });
 
-    wx.closeBluetoothAdapter({
-      // 关闭蓝牙适配器完成
-      complete(res) {
-        console.log(res.errMsg);
-        wx.openBluetoothAdapter({
-          // 打开蓝牙适配器成功
-          success(res) {
-            wx.createBLEConnection({
-              deviceId: that.data.devId,
-              // 创建BLE连接成功
-              success(res) {
-                // 读设备配置
-                wx.readBLECharacteristicValue({
-                  deviceId: that.data.devId,
-                  serviceId: vfxServiceId,
-                  characteristicId: vfxCharacteristicId,
-                  complete(res) {
-                    console.log(res.errMsg);
-                  }
-                });
-                // 读固件版本
-                wx.readBLECharacteristicValue({
-                  deviceId: that.data.devId,
-                  serviceId: otaServiceId,
-                  characteristicId: otaCharacteristicId,
-                  fail(res) {
-                    wx.hideLoading();
-                    wx.showModal({
-                      title: '提示',
-                      content: '不支持该设备',
-                      showCancel: false,
-                      success: function(res) {
-                        that.setData({
-                          cancelled: true
-                        });
-                        wx.navigateBack({
-                          delta: 1
-                        });
-                      }
-                    });
-                  },
-                  complete(res) {
-                    console.log(res.errMsg);
-                  }
-                });
-                // 数据到达回调
-                wx.onBLECharacteristicValueChange(function(res) {
-                  // 设备配置信息
-                  if (res.characteristicId == vfxCharacteristicId) {
-                    let data = new Uint8Array(res.value);
-                    /*
-                        BTT0: VFX Enabled
-                        BIT1: Cube Mode Enabled
-                        BIT2: Backlight Enabled
-                        BIT3: Audio Input Enabled
-                    */
-                    if (data[0] & 0x01) {
-                      that.setData({
-                        devHasVfx: true,
-                        vfxScaleFactor: data[2] << 8 | data[3],
-                        vfxLightness: data[4] << 8 | data[5]
-                      });
-                    }
-                    if (data[0] & 0x02) {
-                      that.setData({
-                        devIsCube: true,
-                        vfxModeIdx: that.data.vfxModeList.findIndex(function(e) {return e.id == data[1];})
-                      });
-                    } else {
-                      that.setData({
-                        vfxModeIdx: data[1]
-                      });
-                    }
-                    if (data[0] & 0x04) {
-                      that.setData({
-                        devHasBlk: true,
-                        vfxBacklight: data[6]
-                      });
-                    }
-                    if (data[0] & 0x08) {
-                      that.setData({
-                        devHasAin: true
-                      });
-                      if (data[7]) {
-                        that.setData({
-                          vfxAudioInput: true
-                        });
-                      }
-                    }
-                    that.setData({
-                      recvMask: that.data.recvMask | 0x1
-                    });
-                  }
-                  // 固件版本信息
-                  if (res.characteristicId == otaCharacteristicId) {
-                    that.setData({
-                      devVer: util.ab2str(res.value),
-                      recvMask: that.data.recvMask | 0x2
-                    });
-                  }
-                  // 数据接收完毕
-                  if (that.data.recvMask == 0x3) {
-                    wx.hideLoading();
-                  }
-                });
-              },
-              // 创建BLE连接失败
-              fail: function(res) {
-                wx.hideLoading();
-                wx.showModal({
-                  title: '提示',
-                  content: '无法连接到设备',
-                  showCancel: false,
-                  success: function(res) {
-                    wx.navigateBack({
-                      delta: 1
-                    });
-                  }
-                });
-              },
-              // 创建BLE连接完成
-              complete(res) {
-                console.log(res.errMsg);
-              }
-            });
-            // BLE链路状态回调
-            wx.onBLEConnectionStateChange(function(res) {
-              // 链路中断
-              if (that.data.cancelled == false && res.connected == false) {
-                wx.hideLoading();
-                wx.showModal({
-                  title: '提示',
-                  content: '与设备连接中断',
-                  showCancel: false,
-                  success: function(res) {
-                    wx.navigateBack({
-                      delta: 1
-                    });
-                  }
-                });
-              }
-            });
-          },
-          // 打开蓝牙适配器失败
-          fail: function(res) {
+    wx.createBLEConnection({
+      deviceId: that.data.devId,
+      // 创建BLE连接成功
+      success(res) {
+        // 读设备配置
+        wx.readBLECharacteristicValue({
+          deviceId: that.data.devId,
+          serviceId: vfxServiceId,
+          characteristicId: vfxCharacteristicId,
+          complete(res) {
+            console.log(res.errMsg);
+          }
+        });
+        // 读固件版本
+        wx.readBLECharacteristicValue({
+          deviceId: that.data.devId,
+          serviceId: otaServiceId,
+          characteristicId: otaCharacteristicId,
+          fail(res) {
             wx.hideLoading();
             wx.showModal({
               title: '提示',
-              content: '请检查手机蓝牙是否打开',
+              content: '不支持该设备',
               showCancel: false,
               success: function(res) {
                 wx.navigateBack({
@@ -344,9 +218,89 @@ Page({
               }
             });
           },
-          // 打开蓝牙适配器完成
           complete(res) {
             console.log(res.errMsg);
+          }
+        });
+        // 数据到达回调
+        wx.onBLECharacteristicValueChange(function(res) {
+          // 设备配置信息
+          if (res.characteristicId == vfxCharacteristicId) {
+            let data = new Uint8Array(res.value);
+            /*
+                BTT0: VFX Enabled
+                BIT1: Cube Mode Enabled
+                BIT2: Backlight Enabled
+                BIT3: Audio Input Enabled
+            */
+            if (data[0] & 0x01) {
+              that.setData({
+                devHasVfx: true,
+                vfxScaleFactor: data[2] << 8 | data[3],
+                vfxLightness: data[4] << 8 | data[5]
+              });
+            }
+            if (data[0] & 0x02) {
+              that.setData({
+                devIsCube: true,
+                vfxModeIdx: that.data.vfxModeList.findIndex(function(e) {return e.id == data[1];})
+              });
+            } else {
+              that.setData({
+                vfxModeIdx: data[1]
+              });
+            }
+            if (data[0] & 0x04) {
+              that.setData({
+                devHasBlk: true,
+                vfxBacklight: data[6]
+              });
+            }
+            if (data[0] & 0x08) {
+              that.setData({
+                devHasAin: true
+              });
+              if (data[7]) {
+                that.setData({
+                  vfxAudioInput: true
+                });
+              }
+            }
+            that.setData({
+              recvMask: that.data.recvMask | 0x1
+            });
+          }
+          // 固件版本信息
+          if (res.characteristicId == otaCharacteristicId) {
+            that.setData({
+              devVer: util.ab2str(res.value),
+              recvMask: that.data.recvMask | 0x2
+            });
+          }
+          // 数据接收完毕
+          if (that.data.recvMask == 0x3) {
+            wx.hideLoading();
+          }
+        });
+      },
+      // 创建BLE连接完成
+      complete(res) {
+        console.log(res.errMsg);
+      }
+    });
+    // BLE链路状态回调
+    wx.onBLEConnectionStateChange(function(res) {
+      // 链路中断
+      if (!that.data.cancelled && !res.connected) {
+        wx.hideLoading();
+        wx.showModal({
+          title: '提示',
+          content: '与设备连接中断',
+          showCancel: false,
+          success: function(res) {
+            wx.navigateBack({
+              delta: 1
+            });
           }
         });
       }
@@ -359,11 +313,6 @@ Page({
     });
     wx.closeBLEConnection({
       deviceId: this.data.devId,
-      complete(res) {
-        console.log(res.errMsg);
-      }
-    });
-    wx.closeBluetoothAdapter({
       complete(res) {
         console.log(res.errMsg);
       }
