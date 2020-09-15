@@ -340,11 +340,14 @@ Page({
   },
   // 页面卸载事件
   onUnload: function() {
-    this.setData({
+    let that = this;
+
+    that.setData({
       cancelled: true
     });
+
     wx.closeBLEConnection({
-      deviceId: this.data.devId,
+      deviceId: that.data.devId,
       complete(res) {
         console.log(res.errMsg);
       }
