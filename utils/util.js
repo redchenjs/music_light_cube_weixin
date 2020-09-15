@@ -7,7 +7,6 @@ export const formatTime = date => {
   const hour = date.getHours();
   const minute = date.getMinutes();
   const second = date.getSeconds();
-
   return [year, month, day].map(formatNumber).join('/') + ' ' + [hour, minute, second].map(formatNumber).join(':');
 }
 
@@ -27,7 +26,7 @@ export function ab2str(buf) {
 export function str2ab(str) {
   var buf = new ArrayBuffer(str.length);
   var bufView = new Uint8Array(buf);
-  for (var i = 0, strLen = str.length; i < strLen; i++) {
+  for (var i=0, strLen=str.length; i<strLen; i++) {
     bufView[i] = str.charCodeAt(i);
   }
   return buf;

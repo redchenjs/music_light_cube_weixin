@@ -11,7 +11,7 @@ const vfxCharacteristicId = '00005301-0000-1000-8000-00805F9B34FB';
 
 Page({
   data: {
-    devId: '',
+    devId: '读取中...',
     devVer: '读取中...',
     recvMask: 0x0,
     cancelled: false,
@@ -49,7 +49,7 @@ Page({
     ]
   },
   // 特效样式输入事件
-  vfxModeInput: function(e) {
+  vfxModeInput(e) {
     let value = e.detail.value;
     if (value > 255) {
       value = 255;
@@ -59,37 +59,37 @@ Page({
     });
   },
   // 特效样式选择事件
-  vfxModePickerChange: function(e) {
+  vfxModePickerChange(e) {
     this.setData({
       vfxModeIdx: e.detail.value
     });
   },
   // 缩放系数滑块事件
-  scaleFactorSliderChange: function(e) {
+  scaleFactorSliderChange(e) {
     this.setData({
       vfxScaleFactor: e.detail.value
     });
   },
   // 亮度滑块事件
-  lightnessSliderChange: function(e) {
+  lightnessSliderChange(e) {
     this.setData({
       vfxLightness: e.detail.value
     });
   },
   // 背光滑块事件
-  backlightSliderChange: function(e) {
+  backlightSliderChange(e) {
     this.setData({
       vfxBacklight: e.detail.value
     });
   },
   // 音频输入开关事件
-  audioInputSwitchChange: function(e) {
+  audioInputSwitchChange(e) {
     this.setData({
       vfxAudioInput: e.detail.value
     });
   },
   // 提交按钮事件
-  submitBtn: function() {
+  submitBtn() {
     let that = this;
 
     wx.showLoading({
@@ -123,9 +123,21 @@ Page({
         wx.hideLoading();
       },
       fail(res) {
-        if (getCurrentPages().length != 1) {
-          wx.navigateBack({
-            delta: 1
+        if (!that.data.cancelled) {
+          wx.hideLoading({
+            success(res) {
+              wx.showModal({
+                title: '提示',
+                content: '数据同步失败',
+                showCancel: false,
+                success(res) {
+                  wx.navigateBack({
+                    delta: 1
+                  });
+                }
+              });
+            },
+            fail(res) {/* empty statement */}
           });
         }
       },
@@ -135,14 +147,14 @@ Page({
     });
   },
   // 重设按钮事件
-  resetBtn: function() {
+  resetBtn() {
     let that = this;
 
     wx.showModal({
       title: '提示',
       content: '确认重设配置',
       showCancel: true,
-      success: function(res) {
+      success(res) {
         if (res.confirm) {
           wx.showLoading({
             title: '数据同步中',
@@ -175,9 +187,21 @@ Page({
               });
             },
             fail(res) {
-              if (getCurrentPages().length != 1) {
-                wx.navigateBack({
-                  delta: 1
+              if (!that.data.cancelled) {
+                wx.hideLoading({
+                  success(res) {
+                    wx.showModal({
+                      title: '提示',
+                      content: '数据同步失败',
+                      showCancel: false,
+                      success(res) {
+                        wx.navigateBack({
+                          delta: 1
+                        });
+                      }
+                    });
+                  },
+                  fail(res) {/* empty statement */}
                 });
               }
             },
@@ -190,7 +214,7 @@ Page({
     });
   },
   // 页面加载事件
-  onLoad: function(e) {
+  onLoad(e) {
     let that = this;
 
     that.setData({
@@ -211,18 +235,45 @@ Page({
           deviceId: that.data.devId,
           serviceId: otaServiceId,
           characteristicId: otaCharacteristicId,
-          fail(res) {
-            wx.hideLoading();
-            wx.showModal({
-              title: '提示',
-              content: '不支持该设备',
-              showCancel: false,
-              success: function(res) {
-                wx.navigateBack({
-                  delta: 1
+          success(res) {
+            // 链路状态回调
+            wx.onBLEConnectionStateChange(function(res) {
+              if (!that.data.cancelled && !res.connected) {
+                wx.hideLoading({
+                  complete(res) {
+                    wx.showModal({
+                      title: '提示',
+                      content: '与设备连接中断',
+                      showCancel: false,
+                      success(res) {
+                        wx.navigateBack({
+                          delta: 1
+                        });
+                      }
+                    });
+                  }
                 });
               }
             });
+          },
+          fail(res) {
+            if (!that.data.cancelled) {
+              wx.hideLoading({
+                success(res) {
+                  wx.showModal({
+                    title: '提示',
+                    content: '不支持该设备',
+                    showCancel: false,
+                    success(res) {
+                      wx.navigateBack({
+                        delta: 1
+                      });
+                    }
+                  });
+                },
+                fail(res) {/* empty statement */}
+              });
+            }
           },
           complete(res) {
             console.log(res.errMsg);
@@ -297,40 +348,26 @@ Page({
             wx.hideLoading();
           }
         });
-        // 链路状态回调
-        wx.onBLEConnectionStateChange(function(res) {
-          // 链路中断
-          if (!that.data.cancelled && !res.connected) {
-            wx.hideLoading({
-              complete: function(res) {/* empty statement */}
-            });
-
-            wx.showModal({
-              title: '提示',
-              content: '与设备连接中断',
-              showCancel: false,
-              success: function(res) {
-                wx.navigateBack({
-                  delta: 1
-                });
-              }
-            });
-          }
-        });
       },
       // 创建BLE连接失败
       fail(res) {
-        wx.hideLoading();
-        wx.showModal({
-          title: '提示',
-          content: '无法连接到设备',
-          showCancel: false,
-          success: function(res) {
-            wx.navigateBack({
-              delta: 1
-            });
-          }
-        });
+        if (!that.data.cancelled) {
+          wx.hideLoading({
+            success(res) {
+              wx.showModal({
+                title: '提示',
+                content: '无法连接到设备',
+                showCancel: false,
+                success(res) {
+                  wx.navigateBack({
+                    delta: 1
+                  });
+                }
+              });
+            },
+            fail(res) {/* empty statement */}
+          });
+        }
       },
       // 创建BLE连接完成
       complete(res) {
@@ -339,7 +376,7 @@ Page({
     });
   },
   // 页面卸载事件
-  onUnload: function() {
+  onUnload() {
     let that = this;
 
     that.setData({

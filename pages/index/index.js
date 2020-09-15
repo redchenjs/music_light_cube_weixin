@@ -9,7 +9,7 @@ Page({
     buttonText: '搜索设备'
   },
   // 选取导航事件
-  selectNav: function(e) {
+  selectNav(e) {
     this.setData({
       navOpen: false
     });
@@ -21,7 +21,7 @@ Page({
     }, 300);
   },
   // 关闭导航事件
-  closeNav: function() {
+  closeNav() {
     let that = this;
 
     wx.stopBluetoothDevicesDiscovery({
@@ -35,7 +35,7 @@ Page({
     });
   },
   // 搜索按钮事件
-  searchBtn: function() {
+  searchBtn() {
     let that = this;
 
     if (!that.data.discovering) {
@@ -81,7 +81,7 @@ Page({
               });
             },
             // 打开蓝牙适配器失败
-            fail: function(res) {
+            fail(res) {
               wx.showModal({
                 title: '提示',
                 content: '请检查本机蓝牙是否打开',
@@ -104,7 +104,7 @@ Page({
     }
   },
   // 页面隐藏事件
-  onHide: function() {
+  onHide() {
     let that = this;
 
     if (that.data.discovering) {
@@ -120,7 +120,7 @@ Page({
     }
   },
   // 页面卸载事件
-  onUnload: function() {
+  onUnload() {
     wx.stopBluetoothDevicesDiscovery({
       complete(res) {
         console.log(res.errMsg);
