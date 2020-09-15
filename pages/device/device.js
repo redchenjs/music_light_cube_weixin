@@ -12,7 +12,7 @@ const vfxCharacteristicId = '00005301-0000-1000-8000-00805F9B34FB';
 Page({
   data: {
     devId: '',
-    devVer: '',
+    devVer: '读取中...',
     recvMask: 0x0,
     cancelled: false,
     devHasVfx: false,
@@ -119,8 +119,17 @@ Page({
       serviceId: vfxServiceId,
       characteristicId: vfxCharacteristicId,
       value: buffer,
-      complete(res) {
+      success(res) {
         wx.hideLoading();
+      },
+      fail(res) {
+        if (getCurrentPages().length != 1) {
+          wx.navigateBack({
+            delta: 1
+          });
+        }
+      },
+      complete(res) {
         console.log(res.errMsg);
       }
     });
@@ -153,7 +162,7 @@ Page({
             value: buffer,
             success(res) {
               that.setData({
-                recvMask: 0x2
+                recvMask: 0x1
               });
               // 回读新配置
               wx.readBLECharacteristicValue({
@@ -164,6 +173,13 @@ Page({
                   console.log(res.errMsg);
                 }
               });
+            },
+            fail(res) {
+              if (getCurrentPages().length != 1) {
+                wx.navigateBack({
+                  delta: 1
+                });
+              }
             },
             complete(res) {
               console.log(res.errMsg);
@@ -190,15 +206,6 @@ Page({
       deviceId: that.data.devId,
       // 创建BLE连接成功
       success(res) {
-        // 读设备配置
-        wx.readBLECharacteristicValue({
-          deviceId: that.data.devId,
-          serviceId: vfxServiceId,
-          characteristicId: vfxCharacteristicId,
-          complete(res) {
-            console.log(res.errMsg);
-          }
-        });
         // 读固件版本
         wx.readBLECharacteristicValue({
           deviceId: that.data.devId,
@@ -221,8 +228,24 @@ Page({
             console.log(res.errMsg);
           }
         });
+        // 读设备配置
+        wx.readBLECharacteristicValue({
+          deviceId: that.data.devId,
+          serviceId: vfxServiceId,
+          characteristicId: vfxCharacteristicId,
+          complete(res) {
+            console.log(res.errMsg);
+          }
+        });
         // 数据到达回调
         wx.onBLECharacteristicValueChange(function(res) {
+          // 固件版本信息
+          if (res.characteristicId == otaCharacteristicId) {
+            that.setData({
+              devVer: ab2str(res.value),
+              recvMask: that.data.recvMask | 0x1
+            });
+          }
           // 设备配置信息
           if (res.characteristicId == vfxCharacteristicId) {
             let data = new Uint8Array(res.value);
@@ -266,13 +289,6 @@ Page({
               }
             }
             that.setData({
-              recvMask: that.data.recvMask | 0x1
-            });
-          }
-          // 固件版本信息
-          if (res.characteristicId == otaCharacteristicId) {
-            that.setData({
-              devVer: ab2str(res.value),
               recvMask: that.data.recvMask | 0x2
             });
           }
@@ -281,23 +297,33 @@ Page({
             wx.hideLoading();
           }
         });
-      },
-      // 创建BLE连接完成
-      complete(res) {
-        console.log(res.errMsg);
-      }
-    });
-    // BLE链路状态回调
-    wx.onBLEConnectionStateChange(function(res) {
-      // 链路中断
-      if (!that.data.cancelled && !res.connected) {
-        wx.hideLoading({
-          complete: function(res) {/* empty statement */}
-        });
+        // 链路状态回调
+        wx.onBLEConnectionStateChange(function(res) {
+          // 链路中断
+          if (!that.data.cancelled && !res.connected) {
+            wx.hideLoading({
+              complete: function(res) {/* empty statement */}
+            });
 
+            wx.showModal({
+              title: '提示',
+              content: '与设备连接中断',
+              showCancel: false,
+              success: function(res) {
+                wx.navigateBack({
+                  delta: 1
+                });
+              }
+            });
+          }
+        });
+      },
+      // 创建BLE连接失败
+      fail(res) {
+        wx.hideLoading();
         wx.showModal({
           title: '提示',
-          content: '与设备连接中断',
+          content: '无法连接到设备',
           showCancel: false,
           success: function(res) {
             wx.navigateBack({
@@ -305,6 +331,10 @@ Page({
             });
           }
         });
+      },
+      // 创建BLE连接完成
+      complete(res) {
+        console.log(res.errMsg);
       }
     });
   },
