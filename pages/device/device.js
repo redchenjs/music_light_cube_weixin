@@ -1,7 +1,6 @@
 // device.js
-// 获取应用实例
-const app = getApp();
-const util = require('../../utils/util.js');
+
+import { ab2str } from '../../utils/util.js';
 
 // 固件更新服务
 const otaServiceId = '0000FF52-0000-1000-8000-00805F9B34FB';
@@ -273,7 +272,7 @@ Page({
           // 固件版本信息
           if (res.characteristicId == otaCharacteristicId) {
             that.setData({
-              devVer: util.ab2str(res.value),
+              devVer: ab2str(res.value),
               recvMask: that.data.recvMask | 0x2
             });
           }
@@ -292,7 +291,10 @@ Page({
     wx.onBLEConnectionStateChange(function(res) {
       // 链路中断
       if (!that.data.cancelled && !res.connected) {
-        wx.hideLoading();
+        wx.hideLoading({
+          complete: function(res) {/* empty statement */}
+        });
+
         wx.showModal({
           title: '提示',
           content: '与设备连接中断',

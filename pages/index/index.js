@@ -1,7 +1,4 @@
 // index.js
-// 获取应用实例
-const app = getApp();
-const util = require('../../utils/util.js');
 
 Page({
   data: {
@@ -16,9 +13,12 @@ Page({
     this.setData({
       navOpen: false
     });
-    wx.navigateTo({
-      url: '../device/device?devId=' + e.currentTarget.dataset.devId
-    });
+
+    setTimeout(function() {
+      wx.navigateTo({
+        url: '../device/device?devId=' + e.currentTarget.dataset.devId
+      });
+    }, 300);
   },
   // 关闭导航事件
   closeNav: function() {
@@ -29,8 +29,7 @@ Page({
         console.log(res.errMsg);
 
         that.setData({
-          navOpen: false,
-          discovering: false
+          navOpen: false
         });
       }
     });
@@ -47,9 +46,6 @@ Page({
           wx.openBluetoothAdapter({
             // 打开蓝牙适配器成功
             success(res) {
-              that.setData({
-                discovering: true
-              });
               wx.startBluetoothDevicesDiscovery({
                 allowDuplicatesKey: false,
                 complete(res) {
@@ -65,30 +61,22 @@ Page({
               });
               // 适配器状态回调
               wx.onBluetoothAdapterStateChange(function(res) {
-                if (!res.available) {
+                if (!res.available || !res.discovering) {
                   that.setData({
-                    prompt: '蓝牙已关闭',
+                    prompt: '未连接',
                     devList: [],
                     navOpen: false,
                     discovering: false,
                     buttonText: '搜索设备'
                   });
                 } else {
-                  if (!res.discovering) {
-                    that.setData({
-                      prompt: '未连接',
-                      devList: [],
-                      navOpen: false,
-                      buttonText: '搜索设备'
-                    });
-                  } else {
-                    that.setData({
-                      prompt: '搜索中...',
-                      devList: [],
-                      navOpen: false,
-                      buttonText: '取消搜索'
-                    });
-                  }
+                  that.setData({
+                    prompt: '搜索中...',
+                    devList: [],
+                    navOpen: false,
+                    discovering: true,
+                    buttonText: '取消搜索'
+                  });
                 }
               });
             },
@@ -97,14 +85,7 @@ Page({
               wx.showModal({
                 title: '提示',
                 content: '请检查本机蓝牙是否打开',
-                showCancel: false,
-                success: function(res) {
-                  that.setData({
-                    prompt: '蓝牙已关闭',
-                    devList: [],
-                    discovering: false
-                  });
-                }
+                showCancel: false
               });
             },
             // 打开蓝牙适配器完成
@@ -118,10 +99,6 @@ Page({
       wx.stopBluetoothDevicesDiscovery({
         complete(res) {
           console.log(res.errMsg);
-
-          that.setData({
-            discovering: false
-          });
         }
       });
     }
@@ -136,8 +113,7 @@ Page({
           console.log(res.errMsg);
 
           that.setData({
-            navOpen: false,
-            discovering: false
+            navOpen: false
           });
         }
       });
