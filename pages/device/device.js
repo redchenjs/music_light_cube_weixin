@@ -120,7 +120,9 @@ Page({
       characteristicId: vfxCharacteristicId,
       value: buffer,
       success(res) {
-        wx.hideLoading();
+        wx.hideLoading({
+          complete(res) { /* empty statement */ }
+        });
       },
       fail(res) {
         if (!that.data.cancelled) {
@@ -137,7 +139,7 @@ Page({
                 }
               });
             },
-            fail(res) {/* empty statement */}
+            fail(res) { /* empty statement */ }
           });
         }
       },
@@ -201,7 +203,7 @@ Page({
                       }
                     });
                   },
-                  fail(res) {/* empty statement */}
+                  fail(res) { /* empty statement */ }
                 });
               }
             },
@@ -237,7 +239,7 @@ Page({
           characteristicId: otaCharacteristicId,
           success(res) {
             // 链路状态回调
-            wx.onBLEConnectionStateChange(function(res) {
+            wx.onBLEConnectionStateChange(function (res) {
               if (!that.data.cancelled && !res.connected) {
                 wx.hideLoading({
                   complete(res) {
@@ -271,7 +273,7 @@ Page({
                     }
                   });
                 },
-                fail(res) {/* empty statement */}
+                fail(res) { /* empty statement */ }
               });
             }
           },
@@ -289,7 +291,7 @@ Page({
           }
         });
         // 数据到达回调
-        wx.onBLECharacteristicValueChange(function(res) {
+        wx.onBLECharacteristicValueChange(function (res) {
           // 固件版本信息
           if (res.characteristicId == otaCharacteristicId) {
             that.setData({
@@ -316,7 +318,7 @@ Page({
             if (data[0] & 0x02) {
               that.setData({
                 devIsCube: true,
-                vfxModeIdx: that.data.vfxModeList.findIndex(function(e) {return e.id == data[1];})
+                vfxModeIdx: that.data.vfxModeList.findIndex(function (e) { return e.id == data[1]; })
               });
             } else {
               that.setData({
@@ -345,7 +347,9 @@ Page({
           }
           // 数据接收完毕
           if (that.data.recvMask == 0x3) {
-            wx.hideLoading();
+            wx.hideLoading({
+              complete(res) { /* empty statement */ }
+            });
           }
         });
       },
@@ -365,7 +369,7 @@ Page({
                 }
               });
             },
-            fail(res) {/* empty statement */}
+            fail(res) { /* empty statement */ }
           });
         }
       },

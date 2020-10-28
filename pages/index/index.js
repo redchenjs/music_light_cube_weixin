@@ -14,7 +14,7 @@ Page({
       navOpen: false
     });
 
-    setTimeout(function() {
+    setTimeout(function () {
       wx.navigateTo({
         url: '../device/device?devId=' + e.currentTarget.dataset.devId
       });
@@ -53,14 +53,14 @@ Page({
                 }
               });
               // 设备发现回调
-              wx.onBluetoothDeviceFound(function(res) {
+              wx.onBluetoothDeviceFound(function (res) {
                 that.setData({
                   navOpen: true,
                   devList: that.data.devList.concat(res.devices[0])
                 });
               });
               // 适配器状态回调
-              wx.onBluetoothAdapterStateChange(function(res) {
+              wx.onBluetoothAdapterStateChange(function (res) {
                 if (!res.available || !res.discovering) {
                   that.setData({
                     prompt: '未连接',
