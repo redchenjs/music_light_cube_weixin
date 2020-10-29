@@ -84,7 +84,7 @@ Page({
             fail(res) {
               wx.showModal({
                 title: '提示',
-                content: '请检查本机蓝牙是否打开',
+                content: '请检查蓝牙开关是否打开',
                 showCancel: false
               });
             },
