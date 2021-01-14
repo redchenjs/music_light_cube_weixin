@@ -333,13 +333,9 @@ Page({
             }
             if (data[0] & 0x08) {
               that.setData({
-                devHasAin: true
+                devHasAin: true,
+                vfxAudioInput: data[7]
               });
-              if (data[7]) {
-                that.setData({
-                  vfxAudioInput: true
-                });
-              }
             }
             that.setData({
               recvMask: that.data.recvMask | 0x2
