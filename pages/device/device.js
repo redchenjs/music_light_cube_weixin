@@ -1,6 +1,8 @@
 // device.js
 
-import { ab2str } from '../../utils/util.js';
+import { ab2str, str2ab } from '../../utils/util.js';
+
+const TX_BUF_SIZE = 509;
 
 // 固件更新服务
 const otaServiceId = '0000FF52-0000-1000-8000-00805F9B34FB';
@@ -13,6 +15,12 @@ Page({
   data: {
     devId: '读取中...',
     devVer: '读取中...',
+    otaRun: false,
+    otaTimer: 0,
+    dataPath: '',
+    dataSize: 0,
+    dataSent: 0,
+    dataProg: 0,
     recvMask: 0x0,
     cancelled: false,
     devHasVfx: false,
@@ -215,6 +223,206 @@ Page({
       }
     });
   },
+  // 固件升级处理函数
+  otaExec(e) {
+    let that = this;
+
+    console.log('<= ' + ab2str(e));
+
+    if (ab2str(e) === 'OK\r\n') {
+      wx.showLoading({
+        title: '固件升级中',
+        mask: true
+      });
+
+      let dataDone = true;
+      that.setData({
+        otaTimer: setInterval(function () {
+          if (dataDone) {
+            dataDone = false;
+          } else {
+            return;
+          }
+
+          let dataLeft = that.data.dataSize - that.data.dataSent;
+          let dataRead = (dataLeft >= TX_BUF_SIZE) ? TX_BUF_SIZE : dataLeft;
+
+          if (dataLeft != 0) {
+            // 发送OTA数据
+            wx.writeBLECharacteristicValue({
+              deviceId: that.data.devId,
+              serviceId: otaServiceId,
+              characteristicId: otaCharacteristicId,
+              value: str2ab(wx.getFileSystemManager().readFileSync(that.data.dataPath, 'binary', that.data.dataSent, dataRead)),
+              success(res) {
+                dataDone = true;
+              }
+            });
+          } else {
+            clearInterval(that.data.otaTimer);
+          }
+
+          that.setData({
+            dataSent: that.data.dataSent + dataRead,
+            dataProg: that.data.dataSent * 100 / that.data.dataSize
+          });
+        }, 5)
+      });
+    } else if (ab2str(e) === 'DONE\r\n') {
+      if (!that.data.cancelled) {
+        wx.hideLoading({
+          success(res) {
+            wx.showModal({
+              title: '提示',
+              content: '固件升级成功',
+              showCancel: false,
+              success(res) {
+                that.setData({
+                  otaRun: false
+                });
+                // 发送重启设备命令
+                let otaCmd = 'FW+RST!\r\n';
+                console.log('=> ' + otaCmd);
+                wx.writeBLECharacteristicValue({
+                  deviceId: that.data.devId,
+                  serviceId: otaServiceId,
+                  characteristicId: otaCharacteristicId,
+                  value: str2ab(otaCmd),
+                  complete(res) {
+                    console.log(res.errMsg);
+                  }
+                });
+              }
+            });
+          },
+          fail(res) { /* empty statement */ }
+        });
+      }
+    } else if (ab2str(e) === 'FAIL\r\n') {
+      if (!that.data.cancelled) {
+        clearInterval(that.data.otaTimer);
+        wx.hideLoading({
+          success(res) {
+            wx.showModal({
+              title: '提示',
+              content: '设备未就绪',
+              showCancel: false,
+              success(res) {
+                that.setData({
+                  otaRun: false
+                });
+              }
+            });
+          },
+          fail(res) { /* empty statement */ }
+        });
+      }
+    } else if (ab2str(e) === 'ERROR\r\n') {
+      if (!that.data.cancelled) {
+        clearInterval(that.data.otaTimer);
+        wx.hideLoading({
+          success(res) {
+            wx.showModal({
+              title: '提示',
+              content: '固件写入失败',
+              showCancel: false,
+              success(res) {
+                that.setData({
+                  otaRun: false
+                });
+                wx.navigateBack({
+                  delta: 1
+                });
+              }
+            });
+          },
+          fail(res) { /* empty statement */ }
+        });
+      }
+    }
+  },
+  // 选项按钮事件
+  optionBtn() {
+    let that = this;
+
+    wx.showActionSheet({
+      itemList: ['固件升级', '重启设备'],
+      success(res) {
+        switch (res.tapIndex) {
+          case 0: // 固件升级
+            wx.chooseMessageFile({
+              count: 1,
+              type: 'file',
+              success(res){
+                that.setData({
+                  dataPath: res.tempFiles[0].path,
+                  dataSize: res.tempFiles[0].size,
+                  dataSent: 0,
+                  dataProg: 0
+                });
+
+                wx.showModal({
+                  title: '提示',
+                  content: '确认升级固件',
+                  showCancel: true,
+                  success(res) {
+                    if (res.confirm) {
+                      wx.showLoading({
+                        title: '等待设备就绪',
+                        mask: true
+                      });
+
+                      that.setData({
+                        otaRun: true
+                      });
+
+                      // 发送固件升级命令
+                      let otaCmd = 'FW+UPD:' + that.data.dataSize + '\r\n';
+                      console.log('=> ' + otaCmd);
+                      wx.writeBLECharacteristicValue({
+                        deviceId: that.data.devId,
+                        serviceId: otaServiceId,
+                        characteristicId: otaCharacteristicId,
+                        value: str2ab(otaCmd),
+                        complete(res) {
+                          console.log(res.errMsg);
+                        }
+                      });
+                    }
+                  }
+                });
+              }
+            });
+            break;
+          case 1: // 重启设备
+            wx.showModal({
+              title: '提示',
+              content: '确认重启设备',
+              showCancel: true,
+              success(res) {
+                if (res.confirm) {
+                  // 发送重启设备命令
+                  let otaCmd = 'FW+RST!\r\n';
+                  console.log('=> ' + otaCmd);
+                  wx.writeBLECharacteristicValue({
+                    deviceId: that.data.devId,
+                    serviceId: otaServiceId,
+                    characteristicId: otaCharacteristicId,
+                    value: str2ab(otaCmd),
+                    complete(res) {
+                      console.log(res.errMsg);
+                    }
+                  });
+                }
+              }
+            });
+            break;
+          default:
+            break;
+        }
+      }
+    });
+  },
   // 页面加载事件
   onLoad(e) {
     let that = this;
@@ -232,6 +440,24 @@ Page({
       deviceId: that.data.devId,
       // 创建BLE连接成功
       success(res) {
+        // 设置MTU大小
+        wx.setBLEMTU({
+          deviceId: that.data.devId,
+          mtu: TX_BUF_SIZE + 3,
+          complete(res) {
+            console.log(res.errMsg);
+          }
+        });
+        // 启用OTA服务通知
+        wx.notifyBLECharacteristicValueChange({
+          state: true,
+          deviceId: that.data.devId,
+          serviceId: otaServiceId,
+          characteristicId: otaCharacteristicId,
+          complete(res) {
+            console.log(res.errMsg);
+          }
+        });
         // 读固件版本
         wx.readBLECharacteristicValue({
           deviceId: that.data.devId,
@@ -294,10 +520,16 @@ Page({
         wx.onBLECharacteristicValueChange(function (res) {
           // 固件版本信息
           if (res.characteristicId == otaCharacteristicId) {
-            that.setData({
-              devVer: ab2str(res.value),
-              recvMask: that.data.recvMask | 0x1
-            });
+            if (!that.data.otaRun) {
+              that.setData({
+                devVer: ab2str(res.value),
+                recvMask: that.data.recvMask | 0x1
+              });
+            } else {
+              that.otaExec(res.value);
+
+              return;
+            }
           }
           // 设备配置信息
           if (res.characteristicId == vfxCharacteristicId) {

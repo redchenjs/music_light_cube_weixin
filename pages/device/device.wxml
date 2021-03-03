@@ -7,6 +7,9 @@
     <view class="info-view">
       <text class="info-text">固件版本: {{devVer}}\n</text>
     </view>
+    <view class="progress-view">
+      <progress percent="{{dataProg}}" stroke-width="3" />
+    </view>
   </view>
   <view class="settings">
     <text class="setting-title">特效样式</text>
@@ -40,5 +43,6 @@
   <view class="button-view">
     <button disabled="{{!devHasVfx & !devHasBlk & !devHasAin}}" type="primary" class="submit-button" bindtap="submitBtn">提交</button>
     <button disabled="{{!devHasVfx & !devHasBlk & !devHasAin}}" type="warn" class="reset-button" bindtap="resetBtn">重设</button>
+    <button class="option-button" bindtap="optionBtn">选项</button>
   </view>
 </view>

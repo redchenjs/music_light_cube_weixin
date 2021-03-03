@@ -1,7 +1,7 @@
 /* device.wxss */
 
 .container {
-  padding: 25rpx 0;
+  padding: 20rpx 0;
 }
 
 .info {
@@ -11,16 +11,20 @@
 }
 
 .info-view {
-  margin-top: 15rpx;
-  margin-bottom: 15rpx;
+  margin-top: 20rpx;
+  margin-bottom: 20rpx;
 }
 
 .info-text {
   color: #aaa;
 }
 
+.progress-view {
+  margin-top: 40rpx;
+}
+
 .settings {
-  margin-top: 50rpx;
+  margin-top: 40rpx;
   margin-left: auto;
   margin-right: auto;
   width: 95%;
@@ -75,6 +79,12 @@
 }
 
 .reset-button {
+  margin-top: 25rpx;
+  margin-left: 25rpx;
+  margin-right: 25rpx;
+}
+
+.option-button {
   margin-top: 25rpx;
   margin-left: 25rpx;
   margin-right: 25rpx;
