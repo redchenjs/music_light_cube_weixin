@@ -19,7 +19,7 @@ Page({
     otaTimer: 0,
     dataPath: '',
     dataSize: 0,
-    dataSent: 0,
+    dataDone: 0,
     dataProg: 0,
     recvMask: 0x0,
     cancelled: false,
@@ -223,11 +223,15 @@ Page({
       }
     });
   },
-  // 固件升级处理函数
+  // OTA数据处理函数
   otaExec(e) {
     let that = this;
 
-    console.log('<= ' + ab2str(e));
+    if (!that.data.cancelled) {
+      console.log('<= ' + ab2str(e));
+    } else {
+      return;
+    }
 
     if (ab2str(e) === 'OK\r\n') {
       wx.showLoading({
@@ -235,16 +239,16 @@ Page({
         mask: true
       });
 
-      let dataDone = true;
+      let dataSent = true;
       that.setData({
         otaTimer: setInterval(function () {
-          if (dataDone) {
-            dataDone = false;
+          if (dataSent) {
+            dataSent = false;
           } else {
             return;
           }
 
-          let dataLeft = that.data.dataSize - that.data.dataSent;
+          let dataLeft = that.data.dataSize - that.data.dataDone;
           let dataRead = (dataLeft >= TX_BUF_SIZE) ? TX_BUF_SIZE : dataLeft;
 
           if (dataLeft != 0) {
@@ -253,9 +257,9 @@ Page({
               deviceId: that.data.devId,
               serviceId: otaServiceId,
               characteristicId: otaCharacteristicId,
-              value: str2ab(wx.getFileSystemManager().readFileSync(that.data.dataPath, 'binary', that.data.dataSent, dataRead)),
+              value: str2ab(wx.getFileSystemManager().readFileSync(that.data.dataPath, 'binary', that.data.dataDone, dataRead)),
               success(res) {
-                dataDone = true;
+                dataSent = true;
               }
             });
           } else {
@@ -263,82 +267,76 @@ Page({
           }
 
           that.setData({
-            dataSent: that.data.dataSent + dataRead,
-            dataProg: that.data.dataSent * 100 / that.data.dataSize
+            dataDone: that.data.dataDone + dataRead,
+            dataProg: that.data.dataDone * 100 / that.data.dataSize
           });
         }, 5)
       });
     } else if (ab2str(e) === 'DONE\r\n') {
-      if (!that.data.cancelled) {
-        wx.hideLoading({
-          success(res) {
-            wx.showModal({
-              title: '提示',
-              content: '固件升级成功',
-              showCancel: false,
-              success(res) {
-                that.setData({
-                  otaRun: false
-                });
-                // 发送重启设备命令
-                let otaCmd = 'FW+RST!\r\n';
-                console.log('=> ' + otaCmd);
-                wx.writeBLECharacteristicValue({
-                  deviceId: that.data.devId,
-                  serviceId: otaServiceId,
-                  characteristicId: otaCharacteristicId,
-                  value: str2ab(otaCmd),
-                  complete(res) {
-                    console.log(res.errMsg);
-                  }
-                });
-              }
-            });
-          },
-          fail(res) { /* empty statement */ }
-        });
-      }
+      wx.hideLoading({
+        success(res) {
+          wx.showModal({
+            title: '提示',
+            content: '固件升级成功',
+            showCancel: false,
+            success(res) {
+              that.setData({
+                otaRun: false
+              });
+              // 发送重启设备命令
+              let otaCmd = 'FW+RST!\r\n';
+              console.log('=> ' + otaCmd);
+              wx.writeBLECharacteristicValue({
+                deviceId: that.data.devId,
+                serviceId: otaServiceId,
+                characteristicId: otaCharacteristicId,
+                value: str2ab(otaCmd),
+                complete(res) {
+                  console.log(res.errMsg);
+                }
+              });
+            }
+          });
+        },
+        fail(res) { /* empty statement */ }
+      });
     } else if (ab2str(e) === 'FAIL\r\n') {
-      if (!that.data.cancelled) {
-        clearInterval(that.data.otaTimer);
-        wx.hideLoading({
-          success(res) {
-            wx.showModal({
-              title: '提示',
-              content: '设备未就绪',
-              showCancel: false,
-              success(res) {
-                that.setData({
-                  otaRun: false
-                });
-              }
-            });
-          },
-          fail(res) { /* empty statement */ }
-        });
-      }
+      clearInterval(that.data.otaTimer);
+      wx.hideLoading({
+        success(res) {
+          wx.showModal({
+            title: '提示',
+            content: '设备未就绪',
+            showCancel: false,
+            success(res) {
+              that.setData({
+                otaRun: false
+              });
+            }
+          });
+        },
+        fail(res) { /* empty statement */ }
+      });
     } else if (ab2str(e) === 'ERROR\r\n') {
-      if (!that.data.cancelled) {
-        clearInterval(that.data.otaTimer);
-        wx.hideLoading({
-          success(res) {
-            wx.showModal({
-              title: '提示',
-              content: '固件写入失败',
-              showCancel: false,
-              success(res) {
-                that.setData({
-                  otaRun: false
-                });
-                wx.navigateBack({
-                  delta: 1
-                });
-              }
-            });
-          },
-          fail(res) { /* empty statement */ }
-        });
-      }
+      clearInterval(that.data.otaTimer);
+      wx.hideLoading({
+        success(res) {
+          wx.showModal({
+            title: '提示',
+            content: '固件写入失败',
+            showCancel: false,
+            success(res) {
+              that.setData({
+                otaRun: false
+              });
+              wx.navigateBack({
+                delta: 1
+              });
+            }
+          });
+        },
+        fail(res) { /* empty statement */ }
+      });
     }
   },
   // 选项按钮事件
@@ -353,11 +351,11 @@ Page({
             wx.chooseMessageFile({
               count: 1,
               type: 'file',
-              success(res){
+              success(res) {
                 that.setData({
                   dataPath: res.tempFiles[0].path,
                   dataSize: res.tempFiles[0].size,
-                  dataSent: 0,
+                  dataDone: 0,
                   dataProg: 0
                 });
 
