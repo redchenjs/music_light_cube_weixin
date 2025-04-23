@@ -19,5 +19,7 @@ App({
         }
       });
     });
+
+    wx.authorize({scope: "scope.bluetooth"});
   }
 });
